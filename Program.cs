@@ -1,54 +1,57 @@
-﻿using System;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
-using AirQualityApp.Services;
+using AirQualityApp.Models;
+using Newtonsoft.Json.Linq;
 
-namespace AirQualityApp
+namespace AirQualityApp.Services
 {
-    class Program
+    public class CityService
     {
-        static async Task Main(string[] args)
+        private readonly HttpClient _httpClient;
+        private readonly string _geoNamesUsername;
+
+        public CityService(string geoNamesUsername)
         {
-            if (args.Length < 1)
+            _httpClient = new HttpClient();
+            _geoNamesUsername = geoNamesUsername;
+        }
+
+        public async Task<List<City>> GetCitiesAsync(string country)
+        {
+            string countryCode = CountryCodeService.GetCountryCode(country);
+            if (countryCode == null)
             {
-                Console.WriteLine("Usage: AirQualityApp <country>");
-                return;
+                Console.WriteLine($"Code de pays introuvable pour '{country}'");
+                return new List<City>();
             }
 
-            string country = args[0];
-            string geoNamesUsername = "cvandewalle"; // Nom d'utilisateur GeoNames
-            string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Clé API OpenWeatherMap
+            // Ajout des paramètres pour obtenir uniquement les villes principales
+            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=15&username={_geoNamesUsername}");
+            var citiesData = JObject.Parse(response)["geonames"];
+            var cities = new List<City>();
 
-            var cityService = new CityService(geoNamesUsername);
-            var airQualityService = new AirQualityService(openWeatherMapApiKey);
-
-            try
+            if (citiesData != null)
             {
-                var cities = await cityService.GetCitiesAsync(country);
-                var airQualities = await airQualityService.GetAirQualityAsync(cities);
-
-                Console.WriteLine($"Bienvenue en {country}, ici nos 15 plus grandes villes sont :");
-                foreach (var city in cities)
+                foreach (var cityData in citiesData)
                 {
-                    Console.WriteLine($"- {city.Name} avec {city.Population} habitants");
-                }
-
-                var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15).ToList();
-
-                Console.WriteLine($"\nClassement des villes par qualité de l'air (date du jour : {DateTime.Now:dd/MM/yyyy}) :");
-                foreach (var city in sortedCities)
-                {
-                    Console.WriteLine($"{city.City}: {city.QualityIndex}");
+                    cities.Add(new City
+                    {
+                        Name = cityData["name"]?.ToString(),
+                        Latitude = cityData["lat"] != null ? (double)cityData["lat"] : 0,
+                        Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0,
+                        Population = cityData["population"] != null ? (int)cityData["population"] : 0
+                    });
                 }
             }
-            catch (HttpRequestException e)
+
+            Console.WriteLine("Villes récupérées de GeoNames:");
+            foreach (var city in cities)
             {
-                Console.WriteLine($"Erreur de requête HTTP: {e.Message}");
+                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude}) avec {city.Population} habitants");
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Erreur: {e.Message}");
-            }
+
+            return cities;
         }
     }
 }

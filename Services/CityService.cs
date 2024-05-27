@@ -26,7 +26,8 @@ namespace AirQualityApp.Services
                 return new List<City>();
             }
 
-            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&q=city&maxRows=15&country={countryCode}&username={_geoNamesUsername}");
+            // Ajout des paramètres pour obtenir uniquement les villes principales
+            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=15&username={_geoNamesUsername}");
             var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
 
