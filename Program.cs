@@ -18,13 +18,15 @@ namespace AirQualityApp
             string country = args[0];
             string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Remplace par ta clé API OpenWeatherMap
 
-            var airQualityService = new AirQualityService(openWeatherMapApiKey);
+            var openWeatherMapService = new OpenWeatherMapService(openWeatherMapApiKey);
 
             try
             {
-                var airQualities = await airQualityService.GetAirQualityAsync(country);
+                var cities = await openWeatherMapService.GetCitiesAsync(country);
+                var airQualities = await openWeatherMapService.GetAirQualityAsync(cities);
                 var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15);
 
+                Console.WriteLine($"Les 15 plus grandes villes de {country} classées par la qualité de l'air:");
                 foreach (var city in sortedCities)
                 {
                     Console.WriteLine($"{city.City}: {city.QualityIndex}");
