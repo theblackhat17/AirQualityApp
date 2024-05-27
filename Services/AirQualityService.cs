@@ -9,7 +9,7 @@ namespace AirQualityApp.Services
     public class AirQualityService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "d2dbcf9ede6b18f216459d3c829d2b21";
+        private readonly string _apiKey = "YOUR_OPENWEATHERMAP_API_KEY";
 
         public AirQualityService()
         {

@@ -1,34 +1,37 @@
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AirQualityApp.Models;
-using Newtonsoft.Json.Linq;
+using NGeo.GeoNames;
+using NGeo;
 
 namespace AirQualityApp.Services
 {
     public class CityService
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _geoNamesUsername = "cvandewalle";
+        private readonly GeoNamesClient _geoNamesClient;
 
-        public CityService()
+        public CityService(string geoNamesUsername)
         {
-            _httpClient = new HttpClient();
+            _geoNamesClient = new GeoNamesClient(new GeoNamesOptions { UserName = geoNamesUsername });
         }
 
         public async Task<List<City>> GetCitiesAsync(string country)
         {
-            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&q=city&maxRows=15&country={country}&username={_geoNamesUsername}");
-            var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
+            var result = await _geoNamesClient.SearchAsync(new SearchOptions
+            {
+                Q = "city",
+                MaxRows = 15,
+                Country = country
+            });
 
-            foreach (var cityData in citiesData)
+            foreach (var geoName in result.GeoNames)
             {
                 cities.Add(new City
                 {
-                    Name = cityData["name"].ToString(),
-                    Latitude = (double)cityData["lat"],
-                    Longitude = (double)cityData["lng"]
+                    Name = geoName.Name,
+                    Latitude = geoName.Latitude,
+                    Longitude = geoName.Longitude
                 });
             }
 

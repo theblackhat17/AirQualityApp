@@ -17,7 +17,7 @@ namespace AirQualityApp
 
             string country = args[0];
 
-            var cityService = new CityService();
+            var cityService = new CityService("YOUR_GEONAMES_USERNAME"); // Remplacez par votre nom d'utilisateur GeoNames
             var airQualityService = new AirQualityService();
 
             var cities = await cityService.GetCitiesAsync(country);
