@@ -26,7 +26,6 @@ namespace AirQualityApp.Services
                 return new List<City>();
             }
 
-            // Ajout des paramètres pour obtenir uniquement les villes principales
             var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=15&username={_geoNamesUsername}");
             var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
@@ -43,12 +42,6 @@ namespace AirQualityApp.Services
                         Population = cityData["population"] != null ? (int)cityData["population"] : 0
                     });
                 }
-            }
-
-            Console.WriteLine("Villes récupérées de GeoNames:");
-            foreach (var city in cities)
-            {
-                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude}) avec {city.Population} habitants");
             }
 
             return cities;
