@@ -9,22 +9,24 @@ namespace AirQualityApp
     {
         static async Task Main(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
-                Console.WriteLine("Usage: AirQualityApp <country>");
+                Console.WriteLine("Usage: AirQualityApp <country> <GeoNamesUsername>");
                 return;
             }
 
             string country = args[0];
-            string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Remplace par ta clé API OpenWeatherMap
+            string geoNamesUsername = args[1];
+            string openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Remplace par ta clé API OpenWeatherMap
 
-            var openWeatherMapService = new OpenWeatherMapService(openWeatherMapApiKey);
+            var cityService = new CityService(geoNamesUsername);
+            var airQualityService = new AirQualityService(openWeatherMapApiKey);
 
             try
             {
-                var cities = await openWeatherMapService.GetCitiesAsync(country);
-                var airQualities = await openWeatherMapService.GetAirQualityAsync(cities);
-                var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15);
+                var cities = await cityService.GetCitiesAsync(country);
+                var airQualities = await airQualityService.GetAirQualityAsync(cities);
+                var sortedCities = airQualities.Orderby(a => a.QualityIndex).Take(15);
 
                 Console.WriteLine($"Les 15 plus grandes villes de {country} classées par la qualité de l'air:");
                 foreach (var city in sortedCities)

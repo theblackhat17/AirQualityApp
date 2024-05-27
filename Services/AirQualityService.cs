@@ -17,9 +17,8 @@ namespace AirQualityApp.Services
             _apiKey = apiKey;
         }
 
-        public async Task<List<AirQuality>> GetAirQualityAsync(string country)
+        public async Task<List<AirQuality>> GetAirQualityAsync(List<City> cities)
         {
-            var cities = await GetCitiesAsync(country);
             var airQualities = new List<AirQuality>();
 
             foreach (var city in cities)
@@ -37,25 +36,6 @@ namespace AirQualityApp.Services
             }
 
             return airQualities;
-        }
-
-        private async Task<List<City>> GetCitiesAsync(string country)
-        {
-            var response = await _httpClient.GetStringAsync($"http://api.openweathermap.org/data/2.5/find?q={country}&type=like&sort=population&cnt=15&appid={_apiKey}");
-            var citiesData = JObject.Parse(response)["list"];
-            var cities = new List<City>();
-
-            foreach (var cityData in citiesData)
-            {
-                cities.Add(new City
-                {
-                    Name = cityData["name"].ToString(),
-                    Latitude = (double)cityData["coord"]["lat"],
-                    Longitude = (double)cityData["coord"]["lon"]
-                });
-            }
-
-            return cities;
         }
     }
 }

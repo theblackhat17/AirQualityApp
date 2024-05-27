@@ -9,11 +9,12 @@ namespace AirQualityApp.Services
     public class CityService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _geoNamesUsername = "cvandewalle"; // Remplace par ton nom d'utilisateur GeoNames
+        private readonly string _geoNamesUsername;
 
-        public CityService()
+        public CityService(string geoNamesUsername)
         {
             _httpClient = new HttpClient();
+            _geoNamesUsername = geoNamesUsername;
         }
 
         public async Task<List<City>> GetCitiesAsync(string country)
