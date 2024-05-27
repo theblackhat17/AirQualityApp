@@ -19,7 +19,14 @@ namespace AirQualityApp.Services
 
         public async Task<List<City>> GetCitiesAsync(string country)
         {
-            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&q=city&maxRows=15&country={country}&username={_geoNamesUsername}");
+            string countryCode = CountryCodeService.GetCountryCode(country);
+            if (countryCode == null)
+            {
+                Console.WriteLine($"Code de pays introuvable pour '{country}'");
+                return new List<City>();
+            }
+
+            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&q=city&maxRows=15&country={countryCode}&username={_geoNamesUsername}");
             var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
 
@@ -34,6 +41,12 @@ namespace AirQualityApp.Services
                         Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0
                     });
                 }
+            }
+
+            Console.WriteLine("Villes récupérées de GeoNames:");
+            foreach (var city in cities)
+            {
+                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude})");
             }
 
             return cities;
