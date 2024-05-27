@@ -30,7 +30,7 @@ namespace AirQualityApp.Services
                     airQualities.Add(new AirQuality
                     {
                         City = city.Name,
-                        QualityIndex = (int)airQualityData["aqi"]
+                        QualityIndex = airQualityData["aqi"] != null ? (int)airQualityData["aqi"] : 0
                     });
                 }
             }

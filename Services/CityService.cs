@@ -23,14 +23,17 @@ namespace AirQualityApp.Services
             var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
 
-            foreach (var cityData in citiesData)
+            if (citiesData != null)
             {
-                cities.Add(new City
+                foreach (var cityData in citiesData)
                 {
-                    Name = cityData["name"].ToString(),
-                    Latitude = (double)cityData["lat"],
-                    Longitude = (double)cityData["lng"]
-                });
+                    cities.Add(new City
+                    {
+                        Name = cityData["name"]?.ToString(),
+                        Latitude = cityData["lat"] != null ? (double)cityData["lat"] : 0,
+                        Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0
+                    });
+                }
             }
 
             return cities;
