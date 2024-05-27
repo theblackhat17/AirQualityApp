@@ -17,7 +17,7 @@ namespace AirQualityApp
 
             string country = args[0];
             string geoNamesUsername = args[1];
-            string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Remplace par ta clé API OpenWeatherMap
+            string openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Remplace par ta clé API OpenWeatherMap
 
             var cityService = new CityService(geoNamesUsername);
             var airQualityService = new AirQualityService(openWeatherMapApiKey);
@@ -31,4 +31,17 @@ namespace AirQualityApp
                 Console.WriteLine($"Les 15 plus grandes villes de {country} classées par la qualité de l'air:");
                 foreach (var city in sortedCities)
                 {
-                    Console.WriteLine($"{city.City}: {
+                    Console.WriteLine($"{city.City}: {city.QualityIndex}");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Erreur de requête HTTP: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Erreur: {e.Message}");
+            }
+        }
+    }
+}
