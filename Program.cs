@@ -1,57 +1,60 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using AirQualityApp.Models;
-using Newtonsoft.Json.Linq;
+using AirQualityApp.Services;
 
-namespace AirQualityApp.Services
+namespace AirQualityApp
 {
-    public class CityService
+    class Program
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _geoNamesUsername;
-
-        public CityService(string geoNamesUsername)
+        static async Task Main(string[] args)
         {
-            _httpClient = new HttpClient();
-            _geoNamesUsername = geoNamesUsername;
-        }
-
-        public async Task<List<City>> GetCitiesAsync(string country)
-        {
-            string countryCode = CountryCodeService.GetCountryCode(country);
-            if (countryCode == null)
+            if (args.Length < 1)
             {
-                Console.WriteLine($"Code de pays introuvable pour '{country}'");
-                return new List<City>();
+                Console.WriteLine("Usage: AirQualityApp <country>");
+                return;
             }
 
-            // Ajout des paramètres pour obtenir uniquement les villes principales
-            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=15&username={_geoNamesUsername}");
-            var citiesData = JObject.Parse(response)["geonames"];
-            var cities = new List<City>();
+            string country = args[0];
+            string geoNamesUsername = "cvandewalle"; // Nom d'utilisateur GeoNames
+            string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Clé API OpenWeatherMap
 
-            if (citiesData != null)
+            var cityService = new CityService(geoNamesUsername);
+            var airQualityService = new AirQualityService(openWeatherMapApiKey);
+
+            try
             {
-                foreach (var cityData in citiesData)
+                var cities = await cityService.GetCitiesAsync(country);
+                if (cities.Count == 0)
                 {
-                    cities.Add(new City
-                    {
-                        Name = cityData["name"]?.ToString(),
-                        Latitude = cityData["lat"] != null ? (double)cityData["lat"] : 0,
-                        Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0,
-                        Population = cityData["population"] != null ? (int)cityData["population"] : 0
-                    });
+                    Console.WriteLine($"Aucune ville trouvée pour le pays '{country}'");
+                    return;
+                }
+                
+                var airQualities = await airQualityService.GetAirQualityAsync(cities);
+
+                Console.WriteLine($"Bienvenue en {country}, ici nos 15 plus grandes villes sont :");
+                foreach (var city in cities)
+                {
+                    Console.WriteLine($"- {city.Name} avec {city.Population} habitants");
+                }
+
+                var sortedCities = airQualities.OrderBy(a => a.QualityIndex).ToList();
+
+                Console.WriteLine($"\nClassement des villes par qualité de l'air (date du jour : {DateTime.Now:dd/MM/yyyy}) :");
+                foreach (var city in sortedCities)
+                {
+                    Console.WriteLine($"{city.City}: {city.QualityIndex}");
                 }
             }
-
-            Console.WriteLine("Villes récupérées de GeoNames:");
-            foreach (var city in cities)
+            catch (HttpRequestException e)
             {
-                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude}) avec {city.Population} habitants");
+                Console.WriteLine($"Erreur de requête HTTP: {e.Message}");
             }
-
-            return cities;
+            catch (Exception e)
+            {
+                Console.WriteLine($"Erreur: {e.Message}");
+            }
         }
     }
 }

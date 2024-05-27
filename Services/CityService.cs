@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AirQualityApp.Models;
@@ -26,7 +27,7 @@ namespace AirQualityApp.Services
                 return new List<City>();
             }
 
-            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=15&username={_geoNamesUsername}");
+            var response = await _httpClient.GetStringAsync($"http://api.geonames.org/searchJSON?formatted=true&country={countryCode}&featureClass=P&featureCode=PPLA&featureCode=PPLA2&featureCode=PPLA3&featureCode=PPLA4&featureCode=PPLC&maxRows=1000&username={_geoNamesUsername}");
             var citiesData = JObject.Parse(response)["geonames"];
             var cities = new List<City>();
 
@@ -44,7 +45,7 @@ namespace AirQualityApp.Services
                 }
             }
 
-            return cities;
+            return cities.OrderByDescending(c => c.Population).Take(15).ToList();
         }
     }
 }
