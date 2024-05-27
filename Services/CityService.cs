@@ -38,7 +38,8 @@ namespace AirQualityApp.Services
                     {
                         Name = cityData["name"]?.ToString(),
                         Latitude = cityData["lat"] != null ? (double)cityData["lat"] : 0,
-                        Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0
+                        Longitude = cityData["lng"] != null ? (double)cityData["lng"] : 0,
+                        Population = cityData["population"] != null ? (int)cityData["population"] : 0
                     });
                 }
             }
@@ -46,7 +47,7 @@ namespace AirQualityApp.Services
             Console.WriteLine("Villes récupérées de GeoNames:");
             foreach (var city in cities)
             {
-                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude})");
+                Console.WriteLine($"- {city.Name} ({city.Latitude}, {city.Longitude}) avec {city.Population} habitants");
             }
 
             return cities;
