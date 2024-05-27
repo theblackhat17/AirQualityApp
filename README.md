@@ -19,7 +19,7 @@ Avant de commencer, assurez-vous d'avoir les éléments suivants installés sur 
    Ouvrez le terminal et clonez le dépôt GitHub du projet :
 
    ```bash
-   git clone https://github.com/TonNomUtilisateur/NomDuDepot.git
+   git clone https://github.com/theblackhat17/AirQualityApp.git
    cd AirQualityApp
    ```
 
