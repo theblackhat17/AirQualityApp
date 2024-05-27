@@ -16,12 +16,11 @@ namespace AirQualityApp
             }
 
             string country = args[0];
+            string openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Remplace par ta clé API OpenWeatherMap
 
-            var cityService = new CityService();
-            var airQualityService = new AirQualityService();
+            var airQualityService = new AirQualityService(openWeatherMapApiKey);
 
-            var cities = await cityService.GetCitiesAsync(country);
-            var airQualities = await airQualityService.GetAirQualityAsync(cities);
+            var airQualities = await airQualityService.GetAirQualityAsync(country);
 
             var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15);
 
