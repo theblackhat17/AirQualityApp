@@ -16,17 +16,27 @@ namespace AirQualityApp
             }
 
             string country = args[0];
-            string openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Remplace par ta clé API OpenWeatherMap
+            string openWeatherMapApiKey = "d2dbcf9ede6b18f216459d3c829d2b21"; // Remplace par ta clé API OpenWeatherMap
 
             var airQualityService = new AirQualityService(openWeatherMapApiKey);
 
-            var airQualities = await airQualityService.GetAirQualityAsync(country);
-
-            var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15);
-
-            foreach (var city in sortedCities)
+            try
             {
-                Console.WriteLine($"{city.City}: {city.QualityIndex}");
+                var airQualities = await airQualityService.GetAirQualityAsync(country);
+                var sortedCities = airQualities.OrderBy(a => a.QualityIndex).Take(15);
+
+                foreach (var city in sortedCities)
+                {
+                    Console.WriteLine($"{city.City}: {city.QualityIndex}");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Erreur de requête HTTP: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Erreur: {e.Message}");
             }
         }
     }
