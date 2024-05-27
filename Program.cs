@@ -40,11 +40,15 @@ namespace AirQualityApp
                 }
 
                 var sortedCities = airQualities.OrderBy(a => a.QualityIndex).ToList();
+                int rank = 1;
+                int? bestQualityIndex = sortedCities.FirstOrDefault()?.QualityIndex;
 
                 Console.WriteLine($"\nClassement des villes par qualité de l'air (date du jour : {DateTime.Now:dd/MM/yyyy}) :");
                 foreach (var city in sortedCities)
                 {
-                    Console.WriteLine($"{city.City}: {city.QualityIndex}");
+                    string trophy = city.QualityIndex == bestQualityIndex ? "🏆" : "";
+                    Console.WriteLine($"{rank}. {city.City}: {city.QualityIndex} {trophy}");
+                    rank++;
                 }
             }
             catch (HttpRequestException e)
